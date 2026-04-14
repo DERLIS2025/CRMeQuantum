@@ -70,12 +70,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Canal no encontrado.' }, { status: 404 });
   }
 
+  // ✅ FIX: validar assignedUserId dentro de la organización
+  let assignedUserId = session.userId;
+
+  if (body.assignedUserId) {
+    const assignee = await prisma.user.findFirst({
+      where: {
+        id: body.assignedUserId,
+        organizationId: session.organizationId,
+        isActive: true,
+      },
+    });
+
+    if (!assignee) {
+      return NextResponse.json(
+        { error: 'Usuario inválido para esta organización.' },
+        { status: 400 }
+      );
+    }
+
+    assignedUserId = assignee.id;
+  }
+
   const conversation = await prisma.conversation.create({
     data: {
       contactId: contact.id,
       organizationId: session.organizationId,
       channelId: channel.id,
-      assignedUserId: body.assignedUserId ?? session.userId,
+      assignedUserId,
       subject: body.subject ?? `Conversación con ${contact.fullName}`,
       status: (body.status as ConversationStatus) ?? ConversationStatus.OPEN,
       priority: body.priority ?? 'normal',
