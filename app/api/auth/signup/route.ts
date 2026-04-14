@@ -31,19 +31,26 @@ export async function POST(request: Request) {
   }
 
   const companyName = String(body.companyName ?? '').trim();
-  const companySlug = String(body.companySlug ?? '').trim().toLowerCase();
+  const companySlug = String(body.companySlug ?? '')
+    .trim()
+    .toLowerCase();
   const fullName = String(body.fullName ?? '').trim();
-  const email = String(body.email ?? '').trim().toLowerCase();
+  const email = String(body.email ?? '')
+    .trim()
+    .toLowerCase();
   const password = String(body.password ?? '');
 
   if (!companyName || !companySlug || !fullName || !email || !password) {
-    return NextResponse.json({ error: 'Todos los campos son obligatorios.' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Todos los campos son obligatorios.' },
+      { status: 400 }
+    );
   }
 
   if (!isValidSlug(companySlug)) {
     return NextResponse.json(
       { error: 'Slug inválido. Usá minúsculas, números y guiones (sin espacios).' },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -53,31 +60,40 @@ export async function POST(request: Request) {
         error:
           'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.',
       },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
-  const [basePlan, adminRole, existingOrganization] = await Promise.all([
+  const [basePlan, adminRole, existingOrganization, existingUser] = await Promise.all([
     prisma.plan.findUnique({ where: { code: 'base' } }),
     prisma.role.findUnique({ where: { name: 'ADMIN' } }),
     prisma.organization.findUnique({ where: { slug: companySlug } }),
+    prisma.user.findUnique({ where: { email } }),
   ]);
 
   if (!basePlan) {
-    return NextResponse.json({ error: 'No existe plan base configurado (code=base).' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'No existe plan base configurado (code=base).' },
+      { status: 500 }
+    );
   }
 
   if (!adminRole) {
-    return NextResponse.json({ error: 'No existe rol ADMIN configurado.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'No existe rol ADMIN configurado.' },
+      { status: 500 }
+    );
   }
 
   if (existingOrganization) {
     return NextResponse.json({ error: 'Ese slug ya está en uso.' }, { status: 409 });
   }
 
-  const existingUser = await prisma.user.findFirst({ where: { email } });
   if (existingUser) {
-    return NextResponse.json({ error: 'Ya existe un usuario con ese email.' }, { status: 409 });
+    return NextResponse.json(
+      { error: 'Ya existe un usuario con ese email.' },
+      { status: 409 }
+    );
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -129,13 +145,25 @@ export async function POST(request: Request) {
       });
     });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      return NextResponse.json({ error: 'No se pudo crear la cuenta: slug o email duplicado.' }, { status: 409 });
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
+      return NextResponse.json(
+        { error: 'No se pudo crear la cuenta: slug o email duplicado.' },
+        { status: 409 }
+      );
     }
 
     console.error(error);
-    return NextResponse.json({ error: 'Error inesperado al crear la cuenta.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error inesperado al crear la cuenta.' },
+      { status: 500 }
+    );
   }
 
-  return NextResponse.json({ ok: true, message: 'Cuenta creada correctamente. Ya podés iniciar sesión.' }, { status: 201 });
+  return NextResponse.json(
+    { ok: true, message: 'Cuenta creada correctamente. Ya podés iniciar sesión.' },
+    { status: 201 }
+  );
 }
