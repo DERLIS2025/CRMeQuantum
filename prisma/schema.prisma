@@ -1,0 +1,359 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRoleName {
+  ADMIN
+  SUPERVISOR
+  ADVISOR
+}
+
+enum ChannelType {
+  WHATSAPP
+  INSTAGRAM
+  MESSENGER
+}
+
+enum ContactStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum ConversationStatus {
+  OPEN
+  PENDING
+  RESOLVED
+  ARCHIVED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  AUDIO
+  VIDEO
+  FILE
+  TEMPLATE
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  CANCELED
+}
+
+enum SenderType {
+  CONTACT
+  USER
+  AI
+  SYSTEM
+}
+
+model Role {
+  id          String       @id @default(cuid())
+  name        UserRoleName @unique
+  description String?
+  createdAt   DateTime     @default(now())
+
+  users User[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  roleId       String
+  fullName     String
+  email        String   @unique
+  passwordHash String
+  phone        String?
+  avatarUrl    String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  role                   Role           @relation(fields: [roleId], references: [id])
+  assignedContacts       Contact[]      @relation("ContactAssignedUser")
+  assignedConversations  Conversation[] @relation("ConversationAssignedUser")
+  sentMessages           Message[]
+  assignedDeals          Deal[]         @relation("DealAssignedUser")
+  assignedTasks          Task[]         @relation("TaskAssignedUser")
+  notes                  Note[]
+  auditLogs              AuditLog[]
+}
+
+model Channel {
+  id                    String      @id @default(cuid())
+  type                  ChannelType
+  name                  String      @unique
+  externalAccountId     String?
+  accessTokenEncrypted  String?
+  refreshTokenEncrypted String?
+  webhookSecretEncrypted String?
+  phoneNumberId         String?
+  pageId                String?
+  instagramBusinessId   String?
+  isActive              Boolean     @default(true)
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  contactIdentities ContactIdentity[]
+  conversations     Conversation[]
+}
+
+model Contact {
+  id                String        @id @default(cuid())
+  firstName         String?
+  lastName          String?
+  fullName          String
+  companyName       String?
+  email             String?
+  phone             String?
+  city              String?
+  country           String?
+  leadSource        String?
+  serviceInterest   String?
+  status            ContactStatus @default(NEW)
+  assignedUserId    String?
+  priority          String?
+  estimatedValue    Decimal?      @db.Decimal(12, 2)
+  lastInteractionAt DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  assignedUser      User?             @relation("ContactAssignedUser", fields: [assignedUserId], references: [id])
+  identities        ContactIdentity[]
+  conversations     Conversation[]
+  deals             Deal[]
+  tasks             Task[]
+  notes             Note[]
+  contactTags       ContactTag[]
+  aiLogs            AiLog[]
+}
+
+model ContactIdentity {
+  id                 String   @id @default(cuid())
+  contactId          String
+  channelId          String
+  externalUserId     String?
+  externalUsername   String?
+  externalPhone      String?
+  rawProfileDataJson Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  contact Contact @relation(fields: [contactId], references: [id])
+  channel Channel @relation(fields: [channelId], references: [id])
+
+  @@unique([channelId, externalUserId])
+}
+
+model Conversation {
+  id                 String             @id @default(cuid())
+  contactId          String
+  channelId          String
+  assignedUserId     String?
+  subject            String?
+  status             ConversationStatus @default(OPEN)
+  priority           String?
+  unreadCount        Int                @default(0)
+  lastMessageAt      DateTime?
+  lastMessagePreview String?
+  isAiHandled        Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  contact      Contact   @relation(fields: [contactId], references: [id])
+  channel      Channel   @relation(fields: [channelId], references: [id])
+  assignedUser User?     @relation("ConversationAssignedUser", fields: [assignedUserId], references: [id])
+  messages     Message[]
+  tasks        Task[]
+  notes        Note[]
+  aiLogs       AiLog[]
+}
+
+model Message {
+  id                String          @id @default(cuid())
+  conversationId    String
+  senderType        SenderType
+  senderUserId      String?
+  messageType       MessageType     @default(TEXT)
+  direction         MessageDirection
+  externalMessageId String?
+  textBody          String?
+  mediaUrl          String?
+  mimeType          String?
+  deliveryStatus    DeliveryStatus? @default(PENDING)
+  errorMessage      String?
+  rawPayloadJson    Json?
+  createdAt         DateTime        @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  senderUser   User?        @relation(fields: [senderUserId], references: [id])
+  aiLogs       AiLog[]
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String?
+  createdAt DateTime @default(now())
+
+  contactTags ContactTag[]
+}
+
+model ContactTag {
+  id        String @id @default(cuid())
+  contactId String
+  tagId     String
+
+  contact Contact @relation(fields: [contactId], references: [id])
+  tag     Tag     @relation(fields: [tagId], references: [id])
+
+  @@unique([contactId, tagId])
+}
+
+model Pipeline {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  stages PipelineStage[]
+  deals  Deal[]
+}
+
+model PipelineStage {
+  id                 String   @id @default(cuid())
+  pipelineId         String
+  name               String
+  position           Int
+  probabilityPercent Int?
+  createdAt          DateTime @default(now())
+
+  pipeline Pipeline @relation(fields: [pipelineId], references: [id])
+  deals    Deal[]
+
+  @@unique([pipelineId, position])
+}
+
+model Deal {
+  id                String   @id @default(cuid())
+  contactId         String
+  pipelineId        String
+  pipelineStageId   String
+  assignedUserId    String?
+  title             String
+  amount            Decimal? @db.Decimal(12, 2)
+  currency          String?
+  expectedCloseDate DateTime?
+  status            String?
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  contact       Contact       @relation(fields: [contactId], references: [id])
+  pipeline      Pipeline      @relation(fields: [pipelineId], references: [id])
+  pipelineStage PipelineStage @relation(fields: [pipelineStageId], references: [id])
+  assignedUser  User?         @relation("DealAssignedUser", fields: [assignedUserId], references: [id])
+  tasks         Task[]
+  notesRelation Note[]        @relation("DealNotes")
+}
+
+model Task {
+  id             String     @id @default(cuid())
+  contactId      String?
+  conversationId String?
+  dealId         String?
+  assignedUserId String
+  title          String
+  description    String?
+  dueAt          DateTime?
+  status         TaskStatus @default(PENDING)
+  priority       String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  contact      Contact?      @relation(fields: [contactId], references: [id])
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+  deal         Deal?         @relation(fields: [dealId], references: [id])
+  assignedUser User          @relation("TaskAssignedUser", fields: [assignedUserId], references: [id])
+}
+
+model Note {
+  id             String    @id @default(cuid())
+  contactId      String?
+  conversationId String?
+  dealId         String?
+  userId         String
+  content        String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  contact      Contact?      @relation(fields: [contactId], references: [id])
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+  deal         Deal?         @relation("DealNotes", fields: [dealId], references: [id])
+  user         User          @relation(fields: [userId], references: [id])
+}
+
+model Automation {
+  id             String   @id @default(cuid())
+  name           String
+  triggerType    String
+  conditionsJson Json?
+  actionsJson    Json?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model AiLog {
+  id              String   @id @default(cuid())
+  contactId       String?
+  conversationId  String?
+  messageId       String?
+  type            String
+  promptSummary   String?
+  responseSummary String?
+  tokensInput     Int?
+  tokensOutput    Int?
+  createdAt       DateTime @default(now())
+
+  contact      Contact?      @relation(fields: [contactId], references: [id])
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+  message      Message?      @relation(fields: [messageId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  entityType String
+  entityId   String
+  action     String
+  beforeJson Json?
+  afterJson  Json?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+}
