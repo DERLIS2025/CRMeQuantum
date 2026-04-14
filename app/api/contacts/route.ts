@@ -5,12 +5,15 @@ import { getSessionFromRequest } from '@/lib/api-auth';
 
 export async function GET(request: Request) {
   const session = getSessionFromRequest(request);
+
   if (!session) {
     return NextResponse.json({ error: 'No autorizado.' }, { status: 401 });
   }
 
   const contacts = await prisma.contact.findMany({
-    where: { organizationId: session.organizationId },
+    where: {
+      organizationId: session.organizationId,
+    },
     orderBy: { createdAt: 'desc' },
     include: {
       assignedUser: {
@@ -24,6 +27,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const session = getSessionFromRequest(request);
+
   if (!session) {
     return NextResponse.json({ error: 'No autorizado.' }, { status: 401 });
   }

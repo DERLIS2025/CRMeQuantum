@@ -40,6 +40,7 @@ export function decodeSession(token: string): SessionPayload | null {
   }
 
   const expected = sign(payloadBase64);
+
   if (signature.length !== expected.length) {
     return null;
   }
@@ -50,7 +51,9 @@ export function decodeSession(token: string): SessionPayload | null {
     return null;
   }
 
-  const payload = JSON.parse(Buffer.from(payloadBase64, 'base64url').toString()) as SessionPayload;
+  const payload = JSON.parse(
+    Buffer.from(payloadBase64, 'base64url').toString()
+  ) as SessionPayload;
 
   if (!payload.exp || Date.now() > payload.exp * 1000) {
     return null;
@@ -59,7 +62,12 @@ export function decodeSession(token: string): SessionPayload | null {
   return payload;
 }
 
-export async function createSessionCookie(user: { id: string; organizationId: string; email: string; role: string }) {
+export async function createSessionCookie(user: {
+  id: string;
+  organizationId: string;
+  email: string;
+  role: string;
+}) {
   const payload: SessionPayload = {
     userId: user.id,
     organizationId: user.organizationId,
