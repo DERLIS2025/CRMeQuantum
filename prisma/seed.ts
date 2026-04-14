@@ -73,7 +73,10 @@ async function main() {
     });
   }
 
-  const adminRole = await prisma.role.findUniqueOrThrow({ where: { name: 'ADMIN' } });
+  const adminRole = await prisma.role.findUniqueOrThrow({
+    where: { name: 'ADMIN' },
+  });
+
   const passwordHash = await bcrypt.hash('Admin1234!', 10);
 
   await prisma.user.upsert({
