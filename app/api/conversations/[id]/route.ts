@@ -8,18 +8,24 @@ type Context = {
 
 export async function GET(request: Request, context: Context) {
   const session = getSessionFromRequest(request);
+
   if (!session) {
     return NextResponse.json({ error: 'No autorizado.' }, { status: 401 });
   }
 
   const { id } = await context.params;
 
-  const conversation = await prisma.conversation.findUnique({
-    where: { id },
+  const conversation = await prisma.conversation.findFirst({
+    where: {
+      id,
+      organizationId: session.organizationId,
+    },
     include: {
       contact: true,
       channel: true,
-      assignedUser: { select: { id: true, fullName: true, email: true } },
+      assignedUser: {
+        select: { id: true, fullName: true, email: true },
+      },
     },
   });
 

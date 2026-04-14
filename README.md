@@ -1,9 +1,8 @@
-# eQuantum CRM — Base Técnica Inicial (MVP)
+# eQuantum CRM — Base Técnica SaaS (Multi-tenant)
 
-Base inicial del CRM omnicanal de eQuantum con foco en simplicidad, escalabilidad y evolución iterativa.
+Base técnica del CRM omnicanal de eQuantum evolucionada a modelo SaaS multi-tenant:
 
-Actualmente incluye una primera funcionalidad real end-to-end:
-**autenticación básica + módulo de contactos + inbox de conversaciones/mensajes con persistencia en PostgreSQL vía Prisma**.
+**autenticación + contactos + inbox de conversaciones/mensajes con aislamiento por organización**.
 
 ---
 
@@ -13,6 +12,15 @@ Actualmente incluye una primera funcionalidad real end-to-end:
 - Tailwind CSS
 - Prisma ORM
 - PostgreSQL
+
+---
+
+## Enfoque SaaS multi-tenant
+- `Organization` representa cada empresa cliente.
+- `Plan` define el plan comercial.
+- `Subscription` vincula organización y plan activo.
+- Cada sesión incluye `organizationId`.
+- Todas las consultas operativas (`contacts`, `conversations`, `messages`, `channels`) filtran por `organizationId`.
 
 ---
 
@@ -29,11 +37,11 @@ Actualmente incluye una primera funcionalidad real end-to-end:
 
 ## Estado actual
 - Layout administrativo con **sidebar + header + dashboard**.
-- Autenticación básica funcional (login + sesión).
+- Autenticación funcional con sesión.
 - Módulo de **contactos funcional (CRUD básico)**.
 - Módulo de **inbox funcional** para conversaciones y mensajes.
-- Prisma configurado con modelos núcleo del CRM.
-- Seed inicial con roles, pipeline y usuario admin.
+- Base multi-tenant con aislamiento por organización.
+- Seed inicial con plan, organización demo, roles, pipeline, canales y usuario admin.
 - Base preparada para futuras integraciones (Meta + Tati IA).
 
 ---
@@ -41,5 +49,6 @@ Actualmente incluye una primera funcionalidad real end-to-end:
 ## 1) Configurar base de datos y Prisma
 
 1. Copiar variables de entorno:
+
 ```bash
 cp .env.example .env

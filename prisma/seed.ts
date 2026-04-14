@@ -15,6 +15,47 @@ const defaultStages = [
 ];
 
 async function main() {
+  // ===== PLAN =====
+  const basePlan = await prisma.plan.upsert({
+    where: { code: 'base' },
+    update: { isActive: true },
+    create: {
+      code: 'base',
+      name: 'Plan Base',
+      monthlyPrice: 99,
+      isActive: true,
+    },
+  });
+
+  // ===== ORGANIZATION =====
+  const organization = await prisma.organization.upsert({
+    where: { slug: 'demo-equantum' },
+    update: {
+      isActive: true,
+      name: 'eQuantum Demo',
+    },
+    create: {
+      slug: 'demo-equantum',
+      name: 'eQuantum Demo',
+      isActive: true,
+    },
+  });
+
+  // ===== SUBSCRIPTION =====
+  await prisma.subscription.upsert({
+    where: { organizationId: organization.id },
+    update: {
+      planId: basePlan.id,
+      isActive: true,
+    },
+    create: {
+      organizationId: organization.id,
+      planId: basePlan.id,
+      isActive: true,
+    },
+  });
+
+  // ===== ROLES =====
   const roleNames: UserRoleName[] = ['ADMIN', 'SUPERVISOR', 'ADVISOR'];
 
   for (const roleName of roleNames) {
@@ -28,6 +69,7 @@ async function main() {
     });
   }
 
+  // ===== CHANNELS =====
   const channels = [
     { type: 'WHATSAPP', name: 'WhatsApp Demo' },
     { type: 'INSTAGRAM', name: 'Instagram Demo' },
@@ -36,9 +78,15 @@ async function main() {
 
   for (const channel of channels) {
     await prisma.channel.upsert({
-      where: { name: channel.name },
+      where: {
+        organizationId_name: {
+          organizationId: organization.id,
+          name: channel.name,
+        },
+      },
       update: { isActive: true },
       create: {
+        organizationId: organization.id,
         type: channel.type,
         name: channel.name,
         isActive: true,
@@ -46,10 +94,20 @@ async function main() {
     });
   }
 
+  // ===== PIPELINE =====
   const pipeline = await prisma.pipeline.upsert({
-    where: { name: 'Pipeline Comercial eQuantum' },
+    where: {
+      organizationId_name: {
+        organizationId: organization.id,
+        name: 'Pipeline Comercial eQuantum',
+      },
+    },
     update: { isDefault: true },
-    create: { name: 'Pipeline Comercial eQuantum', isDefault: true },
+    create: {
+      organizationId: organization.id,
+      name: 'Pipeline Comercial eQuantum',
+      isDefault: true,
+    },
   });
 
   for (const stage of defaultStages) {
@@ -73,6 +131,7 @@ async function main() {
     });
   }
 
+  // ===== ADMIN USER =====
   const adminRole = await prisma.role.findUniqueOrThrow({
     where: { name: 'ADMIN' },
   });
@@ -80,7 +139,12 @@ async function main() {
   const passwordHash = await bcrypt.hash('Admin1234!', 10);
 
   await prisma.user.upsert({
-    where: { email: 'admin@equantum.local' },
+    where: {
+      organizationId_email: {
+        organizationId: organization.id,
+        email: 'admin@equantum.local',
+      },
+    },
     update: {
       fullName: 'Admin eQuantum',
       roleId: adminRole.id,
@@ -88,6 +152,7 @@ async function main() {
       isActive: true,
     },
     create: {
+      organizationId: organization.id,
       email: 'admin@equantum.local',
       fullName: 'Admin eQuantum',
       passwordHash,
@@ -96,7 +161,9 @@ async function main() {
     },
   });
 
-  console.log('✅ Seed completado. Usuario demo: admin@equantum.local / Admin1234!');
+  console.log(
+    '✅ Seed SaaS completado | Org: demo-equantum | Usuario: admin@equantum.local / Admin1234!'
+  );
 }
 
 main()
