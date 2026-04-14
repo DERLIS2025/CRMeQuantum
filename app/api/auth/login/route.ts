@@ -3,7 +3,23 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { createSessionCookie } from '@/lib/auth';
 
+// ENDPOINT TEMPORAL: Generar hash para una contraseña
+// Usar: POST /api/auth/login?action=hash con body: { "password": "admin123" }
 export async function POST(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const action = searchParams.get('action');
+
+  // Modo temporal: generar hash
+  if (action === 'hash') {
+    const body = await request.json().catch(() => null);
+    if (!body?.password) {
+      return NextResponse.json({ error: 'Password requerido' }, { status: 400 });
+    }
+    const hash = await bcrypt.hash(body.password, 10);
+    return NextResponse.json({ hash });
+  }
+
+  // Modo normal: login
   const body = await request.json().catch(() => null);
 
   if (!body?.email || !body?.password) {
