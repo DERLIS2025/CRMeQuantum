@@ -93,30 +93,30 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  role                   Role           @relation(fields: [roleId], references: [id])
-  assignedContacts       Contact[]      @relation("ContactAssignedUser")
-  assignedConversations  Conversation[] @relation("ConversationAssignedUser")
-  sentMessages           Message[]
-  assignedDeals          Deal[]         @relation("DealAssignedUser")
-  assignedTasks          Task[]         @relation("TaskAssignedUser")
-  notes                  Note[]
-  auditLogs              AuditLog[]
+  role                  Role           @relation(fields: [roleId], references: [id])
+  assignedContacts      Contact[]      @relation("ContactAssignedUser")
+  assignedConversations Conversation[] @relation("ConversationAssignedUser")
+  sentMessages          Message[]
+  assignedDeals         Deal[]         @relation("DealAssignedUser")
+  assignedTasks         Task[]         @relation("TaskAssignedUser")
+  notes                 Note[]
+  auditLogs             AuditLog[]
 }
 
 model Channel {
-  id                    String      @id @default(cuid())
-  type                  ChannelType
-  name                  String
-  externalAccountId     String?
-  accessTokenEncrypted  String?
-  refreshTokenEncrypted String?
+  id                     String      @id @default(cuid())
+  type                   ChannelType
+  name                   String
+  externalAccountId      String?
+  accessTokenEncrypted   String?
+  refreshTokenEncrypted  String?
   webhookSecretEncrypted String?
-  phoneNumberId         String?
-  pageId                String?
-  instagramBusinessId   String?
-  isActive              Boolean     @default(true)
-  createdAt             DateTime    @default(now())
-  updatedAt             DateTime    @updatedAt
+  phoneNumberId          String?
+  pageId                 String?
+  instagramBusinessId    String?
+  isActive               Boolean     @default(true)
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
 
   contactIdentities ContactIdentity[]
   conversations     Conversation[]
@@ -142,14 +142,14 @@ model Contact {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
-  assignedUser      User?             @relation("ContactAssignedUser", fields: [assignedUserId], references: [id])
-  identities        ContactIdentity[]
-  conversations     Conversation[]
-  deals             Deal[]
-  tasks             Task[]
-  notes             Note[]
-  contactTags       ContactTag[]
-  aiLogs            AiLog[]
+  assignedUser  User?             @relation("ContactAssignedUser", fields: [assignedUserId], references: [id])
+  identities    ContactIdentity[]
+  conversations Conversation[]
+  deals         Deal[]
+  tasks         Task[]
+  notes         Note[]
+  contactTags   ContactTag[]
+  aiLogs        AiLog[]
 }
 
 model ContactIdentity {
@@ -236,7 +236,7 @@ model ContactTag {
 
 model Pipeline {
   id        String   @id @default(cuid())
-  name      String
+  name      String   @unique
   isDefault Boolean  @default(false)
   createdAt DateTime @default(now())
 

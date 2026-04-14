@@ -1,40 +1,44 @@
 # eQuantum CRM — Base Técnica Inicial (MVP)
 
-Base inicial del proyecto para construir el CRM omnicanal de eQuantum con foco en simplicidad, escalabilidad y evolución iterativa.
+Base inicial del CRM omnicanal de eQuantum con foco en simplicidad, escalabilidad y evolución iterativa.
 
-## Stack definido
-- **Next.js** (App Router)
-- **TypeScript**
-- **Tailwind CSS**
-- **Prisma ORM**
-- **PostgreSQL**
+Actualmente incluye una primera funcionalidad real end-to-end:
+**autenticación básica + módulo de contactos con persistencia en PostgreSQL vía Prisma**.
 
-## Estructura base
-- `app/`: rutas y layout base administrativo.
-- `components/`: componentes visuales reutilizables.
-- `lib/`: utilidades de infraestructura (ej. cliente Prisma).
-- `prisma/`: esquema de datos y migraciones.
-- `types/`: tipos compartidos de dominio.
-- `services/`: puertos/contratos para integraciones externas.
-- `modules/`: módulos de negocio (auth, contactos, conversaciones, etc.).
+---
+
+## Stack
+- Next.js (App Router)
+- TypeScript
+- Tailwind CSS
+- Prisma ORM
+- PostgreSQL
+
+---
+
+## Estructura principal
+- `app/`: páginas web y endpoints API (`/api/*`).
+- `components/`: UI del panel admin y contactos.
+- `lib/`: cliente Prisma, sesión simple y utilidades de auth API.
+- `prisma/`: `schema.prisma` + `seed.ts`.
+- `services/`: contratos para futuras integraciones (Meta / Tati IA).
+- `modules/`: espacio para casos de uso por dominio.
+- `types/`: tipos compartidos.
+
+---
 
 ## Estado actual
-- Layout administrativo inicial con **sidebar + header + dashboard vacío**.
-- `prisma/schema.prisma` creado con los modelos núcleo del plan maestro.
-- Enums iniciales para estados y tipologías del dominio.
-- Contratos listos para futuras integraciones de canales y Tati IA.
+- Layout administrativo con **sidebar + header + dashboard**.
+- Autenticación básica funcional (login + sesión).
+- Módulo de **contactos funcional (CRUD básico)**.
+- Prisma configurado con modelos núcleo del CRM.
+- Seed inicial con roles, pipeline y usuario admin.
+- Base preparada para futuras integraciones (Meta + Tati IA).
 
-## Comandos recomendados
+---
+
+## 1) Configurar base de datos y Prisma
+
+1. Copiar variables de entorno:
 ```bash
-npm install
-npm run prisma:generate
-npm run dev
-```
-
-## Próximos pasos sugeridos
-1. Crear migración inicial (`prisma migrate dev`).
-2. Sembrar roles base (`ADMIN`, `SUPERVISOR`, `ADVISOR`).
-3. Implementar autenticación (NextAuth o JWT + sesiones).
-4. Construir APIs CRUD para contactos, conversaciones y tareas.
-5. Añadir capa de eventos/webhooks para canales (Meta) en siguiente sprint.
-6. Integrar proveedor de IA para Tati sobre los contratos de `services/`.
+cp .env.example .env
