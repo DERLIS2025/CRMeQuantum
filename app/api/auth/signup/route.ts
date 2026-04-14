@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     prisma.plan.findUnique({ where: { code: 'base' } }),
     prisma.role.findUnique({ where: { name: 'ADMIN' } }),
     prisma.organization.findUnique({ where: { slug: companySlug } }),
-    prisma.user.findUnique({ where: { email } }),
+    prisma.user.findFirst({ where: { email } }),
   ]);
 
   if (!basePlan) {
