@@ -106,7 +106,7 @@ model User {
 model Channel {
   id                     String      @id @default(cuid())
   type                   ChannelType
-  name                   String
+  name                   String      @unique
   externalAccountId      String?
   accessTokenEncrypted   String?
   refreshTokenEncrypted  String?

@@ -2,8 +2,10 @@ import Link from 'next/link';
 
 const menuItems = [
   { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Bandeja', href: '/inbox' },
+  { label: 'Inbox', href: '/inbox' },
   { label: 'Contactos', href: '/contacts' },
+
+  // futuras rutas (cuando existan)
   { label: 'Oportunidades', href: '/deals' },
   { label: 'Tareas', href: '/tasks' },
   { label: 'Automatizaciones', href: '/automations' },

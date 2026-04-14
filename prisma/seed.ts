@@ -28,6 +28,24 @@ async function main() {
     });
   }
 
+  const channels = [
+    { type: 'WHATSAPP', name: 'WhatsApp Demo' },
+    { type: 'INSTAGRAM', name: 'Instagram Demo' },
+    { type: 'MESSENGER', name: 'Messenger Demo' },
+  ] as const;
+
+  for (const channel of channels) {
+    await prisma.channel.upsert({
+      where: { name: channel.name },
+      update: { isActive: true },
+      create: {
+        type: channel.type,
+        name: channel.name,
+        isActive: true,
+      },
+    });
+  }
+
   const pipeline = await prisma.pipeline.upsert({
     where: { name: 'Pipeline Comercial eQuantum' },
     update: { isDefault: true },
@@ -55,7 +73,10 @@ async function main() {
     });
   }
 
-  const adminRole = await prisma.role.findUniqueOrThrow({ where: { name: 'ADMIN' } });
+  const adminRole = await prisma.role.findUniqueOrThrow({
+    where: { name: 'ADMIN' },
+  });
+
   const passwordHash = await bcrypt.hash('Admin1234!', 10);
 
   await prisma.user.upsert({

@@ -3,7 +3,7 @@
 Base inicial del CRM omnicanal de eQuantum con foco en simplicidad, escalabilidad y evolución iterativa.
 
 Actualmente incluye una primera funcionalidad real end-to-end:
-**autenticación básica + módulo de contactos con persistencia en PostgreSQL vía Prisma**.
+**autenticación básica + módulo de contactos + inbox de conversaciones/mensajes con persistencia en PostgreSQL vía Prisma**.
 
 ---
 
@@ -18,7 +18,7 @@ Actualmente incluye una primera funcionalidad real end-to-end:
 
 ## Estructura principal
 - `app/`: páginas web y endpoints API (`/api/*`).
-- `components/`: UI del panel admin y contactos.
+- `components/`: UI del panel admin, contactos e inbox.
 - `lib/`: cliente Prisma, sesión simple y utilidades de auth API.
 - `prisma/`: `schema.prisma` + `seed.ts`.
 - `services/`: contratos para futuras integraciones (Meta / Tati IA).
@@ -31,6 +31,7 @@ Actualmente incluye una primera funcionalidad real end-to-end:
 - Layout administrativo con **sidebar + header + dashboard**.
 - Autenticación básica funcional (login + sesión).
 - Módulo de **contactos funcional (CRUD básico)**.
+- Módulo de **inbox funcional** para conversaciones y mensajes.
 - Prisma configurado con modelos núcleo del CRM.
 - Seed inicial con roles, pipeline y usuario admin.
 - Base preparada para futuras integraciones (Meta + Tati IA).
