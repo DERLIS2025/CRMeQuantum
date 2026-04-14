@@ -38,6 +38,7 @@ Base técnica del CRM omnicanal de eQuantum evolucionada a modelo SaaS multi-ten
 ## Estado actual
 - Layout administrativo con **sidebar + header + dashboard**.
 - Autenticación funcional con sesión.
+- Signup SaaS transaccional para alta de nueva organización.
 - Módulo de **contactos funcional (CRUD básico)**.
 - Módulo de **inbox funcional** para conversaciones y mensajes.
 - Base multi-tenant con aislamiento por organización.

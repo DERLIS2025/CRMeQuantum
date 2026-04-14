@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import { MessageDirection, MessageType, SenderType, DeliveryStatus } from '@prisma/client';
+import {
+  MessageDirection,
+  MessageType,
+  SenderType,
+  DeliveryStatus,
+} from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getSessionFromRequest } from '@/lib/api-auth';
 

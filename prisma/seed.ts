@@ -22,6 +22,7 @@ async function main() {
     create: {
       code: 'base',
       name: 'Plan Base',
+      description: 'Plan inicial SaaS para eQuantum CRM',
       monthlyPrice: 99,
       isActive: true,
     },

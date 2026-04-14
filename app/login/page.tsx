@@ -1,10 +1,14 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const signupSuccess = searchParams.get('signup') === 'success';
+
   const [email, setEmail] = useState('admin@equantum.local');
   const [password, setPassword] = useState('Admin1234!');
   const [error, setError] = useState<string | null>(null);
@@ -39,9 +43,20 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
         <h1 className="text-xl font-semibold text-slate-900">Ingreso eQuantum CRM</h1>
-        <p className="mt-1 text-sm text-slate-600">Usá tu email y contraseña para entrar al panel.</p>
+        <p className="mt-1 text-sm text-slate-600">
+          Usá tu email y contraseña para entrar al panel.
+        </p>
+
+        {signupSuccess ? (
+          <p className="mt-2 rounded-md bg-emerald-50 px-2 py-1 text-sm text-emerald-700">
+            Cuenta creada correctamente. Ahora podés iniciar sesión.
+          </p>
+        ) : null}
 
         <div className="mt-4 space-y-3">
           <div>
@@ -82,6 +97,13 @@ export default function LoginPage() {
         >
           {loading ? 'Ingresando...' : 'Iniciar sesión'}
         </button>
+
+        <p className="mt-4 text-center text-sm text-slate-600">
+          ¿No tenés cuenta?{' '}
+          <Link href="/signup" className="font-medium text-slate-900 underline">
+            Crear empresa
+          </Link>
+        </p>
       </form>
     </main>
   );
