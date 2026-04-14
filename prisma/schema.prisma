@@ -73,50 +73,50 @@ enum SenderType {
 }
 
 model Plan {
-  id            String         @id @default(cuid())
-  code          String         @unique
-  name          String
-  description   String?
-  monthlyPrice  Decimal?       @db.Decimal(10, 2)
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id           String   @id @default(cuid())
+  code         String   @unique
+  name         String
+  description  String?
+  monthlyPrice Decimal? @db.Decimal(10, 2)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   subscriptions Subscription[]
 }
 
 model Organization {
-  id          String         @id @default(cuid())
-  name        String
-  slug        String         @unique
-  isActive    Boolean        @default(true)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  users       User[]
-  channels    Channel[]
-  contacts    Contact[]
+  users         User[]
+  channels      Channel[]
+  contacts      Contact[]
   conversations Conversation[]
-  messages    Message[]
-  pipelines   Pipeline[]
-  deals       Deal[]
-  tasks       Task[]
-  notes       Note[]
-  automations Automation[]
-  aiLogs      AiLog[]
-  auditLogs   AuditLog[]
+  messages      Message[]
+  pipelines     Pipeline[]
+  deals         Deal[]
+  tasks         Task[]
+  notes         Note[]
+  automations   Automation[]
+  aiLogs        AiLog[]
+  auditLogs     AuditLog[]
   subscriptions Subscription[]
 }
 
 model Subscription {
-  id              String        @id @default(cuid())
-  organizationId  String
-  planId          String
-  startsAt        DateTime      @default(now())
-  endsAt          DateTime?
-  isActive        Boolean       @default(true)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id             String   @id @default(cuid())
+  organizationId String
+  planId         String
+  startsAt       DateTime @default(now())
+  endsAt         DateTime?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id])
   plan         Plan         @relation(fields: [planId], references: [id])
@@ -147,15 +147,15 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  organization           Organization   @relation(fields: [organizationId], references: [id])
-  role                   Role           @relation(fields: [roleId], references: [id])
-  assignedContacts       Contact[]      @relation("ContactAssignedUser")
-  assignedConversations  Conversation[] @relation("ConversationAssignedUser")
-  sentMessages           Message[]
-  assignedDeals          Deal[]         @relation("DealAssignedUser")
-  assignedTasks          Task[]         @relation("TaskAssignedUser")
-  notes                  Note[]
-  auditLogs              AuditLog[]
+  organization          Organization   @relation(fields: [organizationId], references: [id])
+  role                  Role           @relation(fields: [roleId], references: [id])
+  assignedContacts      Contact[]      @relation("ContactAssignedUser")
+  assignedConversations Conversation[] @relation("ConversationAssignedUser")
+  sentMessages          Message[]
+  assignedDeals         Deal[]         @relation("DealAssignedUser")
+  assignedTasks         Task[]         @relation("TaskAssignedUser")
+  notes                 Note[]
+  auditLogs             AuditLog[]
 
   @@unique([organizationId, email])
   @@index([organizationId])
@@ -206,15 +206,15 @@ model Contact {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
-  organization     Organization      @relation(fields: [organizationId], references: [id])
-  assignedUser     User?             @relation("ContactAssignedUser", fields: [assignedUserId], references: [id])
-  identities       ContactIdentity[]
-  conversations    Conversation[]
-  deals            Deal[]
-  tasks            Task[]
-  notes            Note[]
-  contactTags      ContactTag[]
-  aiLogs           AiLog[]
+  organization  Organization      @relation(fields: [organizationId], references: [id])
+  assignedUser  User?             @relation("ContactAssignedUser", fields: [assignedUserId], references: [id])
+  identities    ContactIdentity[]
+  conversations Conversation[]
+  deals         Deal[]
+  tasks         Task[]
+  notes         Note[]
+  contactTags   ContactTag[]
+  aiLogs        AiLog[]
 
   @@index([organizationId])
 }
@@ -265,21 +265,21 @@ model Conversation {
 }
 
 model Message {
-  id                String           @id @default(cuid())
+  id                String          @id @default(cuid())
   organizationId    String
   conversationId    String
   senderType        SenderType
   senderUserId      String?
-  messageType       MessageType      @default(TEXT)
+  messageType       MessageType     @default(TEXT)
   direction         MessageDirection
   externalMessageId String?
   textBody          String?
   mediaUrl          String?
   mimeType          String?
-  deliveryStatus    DeliveryStatus?  @default(PENDING)
+  deliveryStatus    DeliveryStatus? @default(PENDING)
   errorMessage      String?
   rawPayloadJson    Json?
-  createdAt         DateTime         @default(now())
+  createdAt         DateTime        @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id])
   conversation Conversation @relation(fields: [conversationId], references: [id])
@@ -354,12 +354,12 @@ model Deal {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  organization Organization @relation(fields: [organizationId], references: [id])
-  contact      Contact      @relation(fields: [contactId], references: [id])
-  pipeline     Pipeline     @relation(fields: [pipelineId], references: [id])
+  organization  Organization  @relation(fields: [organizationId], references: [id])
+  contact       Contact       @relation(fields: [contactId], references: [id])
+  pipeline      Pipeline      @relation(fields: [pipelineId], references: [id])
   pipelineStage PipelineStage @relation(fields: [pipelineStageId], references: [id])
-  assignedUser User?          @relation("DealAssignedUser", fields: [assignedUserId], references: [id])
-  tasks        Task[]
+  assignedUser  User?         @relation("DealAssignedUser", fields: [assignedUserId], references: [id])
+  tasks         Task[]
   notesRelation Note[]        @relation("DealNotes")
 
   @@index([organizationId])
@@ -390,15 +390,15 @@ model Task {
 }
 
 model Note {
-  id             String    @id @default(cuid())
+  id             String   @id @default(cuid())
   organizationId String
   contactId      String?
   conversationId String?
   dealId         String?
   userId         String
   content        String
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   organization Organization  @relation(fields: [organizationId], references: [id])
   contact      Contact?      @relation(fields: [contactId], references: [id])

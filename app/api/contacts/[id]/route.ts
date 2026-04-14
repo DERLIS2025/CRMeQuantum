@@ -9,6 +9,7 @@ type Context = {
 
 export async function PATCH(request: Request, context: Context) {
   const session = getSessionFromRequest(request);
+
   if (!session) {
     return NextResponse.json({ error: 'No autorizado.' }, { status: 401 });
   }
@@ -21,7 +22,10 @@ export async function PATCH(request: Request, context: Context) {
   }
 
   const existingContact = await prisma.contact.findFirst({
-    where: { id, organizationId: session.organizationId },
+    where: {
+      id,
+      organizationId: session.organizationId,
+    },
   });
 
   if (!existingContact) {

@@ -15,6 +15,7 @@ const defaultStages = [
 ];
 
 async function main() {
+  // ===== PLAN =====
   const basePlan = await prisma.plan.upsert({
     where: { code: 'base' },
     update: { isActive: true },
@@ -27,9 +28,13 @@ async function main() {
     },
   });
 
+  // ===== ORGANIZATION =====
   const organization = await prisma.organization.upsert({
     where: { slug: 'demo-equantum' },
-    update: { isActive: true, name: 'eQuantum Demo' },
+    update: {
+      isActive: true,
+      name: 'eQuantum Demo',
+    },
     create: {
       slug: 'demo-equantum',
       name: 'eQuantum Demo',
@@ -37,12 +42,12 @@ async function main() {
     },
   });
 
+  // ===== SUBSCRIPTION =====
   await prisma.subscription.upsert({
     where: { organizationId: organization.id },
     update: {
       planId: basePlan.id,
       isActive: true,
-      endsAt: null,
     },
     create: {
       organizationId: organization.id,
@@ -51,6 +56,7 @@ async function main() {
     },
   });
 
+  // ===== ROLES =====
   const roleNames: UserRoleName[] = ['ADMIN', 'SUPERVISOR', 'ADVISOR'];
 
   for (const roleName of roleNames) {
@@ -64,6 +70,7 @@ async function main() {
     });
   }
 
+  // ===== CHANNELS =====
   const channels = [
     { type: 'WHATSAPP', name: 'WhatsApp Demo' },
     { type: 'INSTAGRAM', name: 'Instagram Demo' },
@@ -88,6 +95,7 @@ async function main() {
     });
   }
 
+  // ===== PIPELINE =====
   const pipeline = await prisma.pipeline.upsert({
     where: {
       organizationId_name: {
@@ -124,7 +132,11 @@ async function main() {
     });
   }
 
-  const adminRole = await prisma.role.findUniqueOrThrow({ where: { name: 'ADMIN' } });
+  // ===== ADMIN USER =====
+  const adminRole = await prisma.role.findUniqueOrThrow({
+    where: { name: 'ADMIN' },
+  });
+
   const passwordHash = await bcrypt.hash('Admin1234!', 10);
 
   await prisma.user.upsert({
@@ -136,7 +148,6 @@ async function main() {
     },
     update: {
       fullName: 'Admin eQuantum',
-      organizationId: organization.id,
       roleId: adminRole.id,
       passwordHash,
       isActive: true,
@@ -151,7 +162,9 @@ async function main() {
     },
   });
 
-  console.log('✅ Seed SaaS completado. Org: demo-equantum | Usuario: admin@equantum.local / Admin1234!');
+  console.log(
+    '✅ Seed SaaS completado | Org: demo-equantum | Usuario: admin@equantum.local / Admin1234!'
+  );
 }
 
 main()
